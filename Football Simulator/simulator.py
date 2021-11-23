@@ -15,15 +15,19 @@ class Players:
 		self.name = name
 		self.overall = ovr 
 		self.position = position
-		self.stats = {"overall":ovr,"shoot":shoot,"pass":pass_,"dribble":dribble, "defense":defence}
+		self.stats = {"overall":ovr,"shoot":shoot,"pass":pass_,"dribble":dribble, "defence":defence}
 
 	def print_data(self):
 		#printing stats
 		print(self.name, self.overall, self.position, self.stats)
 
-	def shooting_outcome(self):
+	def randomised_data(self, type_):
+		if type_ == "shoot":
+			return random.randint(5, 50)
+
+
+	def shooting_outcome(self, distance):
 		#gives chance of getting shot on target
-		distance = random.randint(5, 50)
 		luck = random.randint(4, 10)
 
 		skill = (self.stats["shoot"]*0.9)/100
@@ -35,14 +39,55 @@ class Players:
 		
 		outcome = random.choices(["On target", "Off target"], weights=[outcome_prob*100,(100-outcome_prob*100)],k=1)
 		print(outcome)
-		return outcome
-	
+		return outcome[0]
+
+	def saving_outcome(self, distance):
+		
+		luck = random.randint(4, 10)
+
+		skill = (self.stats["defence"]*0.7/100)
+		distance_prob = round((distance+skill*10)/100, 2)
+		luck_prob = luck/10
+
+		outcome_prob = round((((skill*10) + (distance_prob*60) + (luck_prob*2))/72)*distance/40, 2)
+		print(f"{self.name}:{distance}m {distance_prob}, luck {luck_prob}, skill {round(skill,2)}, final {round(outcome_prob*100,2)}%")	
+
+		outcome = random.choices(["Save", "Not save"], weights=[outcome_prob*100, (100-outcome_prob*100)],k=1)
+		print(outcome)
+
+		return outcome[0] 
+
+	def passing_outcome(self, type_):
+		if type_ == "long":
+			pass #will do this later -_- its too late
 
 #Making classes for all players
 for player in players:
 	players_class.append(Players(player[0],player[2],player[1],player[3],player[4],player[5],player[6]))
 
-for _ in range(10):
-	for c in players_class:
-		c.shooting_outcome()
+def match_make():
+	
+	attacker = random.choice(players_class) 
+	goalkeeper = random.choice(players_class)
+	while attacker == goalkeeper:
+		goalkeeper = random.choice(players_class)
+	
+	#finding distance
+	distance = attacker.randomised_data("shoot")
+
+	shot = attacker.shooting_outcome(distance)
+	save = goalkeeper.saving_outcome(distance)
+
+	goal = ""
+
+	if shot == "On target" and save == "Not save":
+		goal += "Goal."
+	else:
+		goal += "Not Goal."
+
+	print(goal)
+
+for _ in range(5):
+	match_make()
+	
 
